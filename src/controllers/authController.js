@@ -1,6 +1,6 @@
 const { DOCTOR, PATIENT } = require("../config/constants");
-const { UserDoctor } = require("../models");
-const { validateLogin } = require("../utility/validateLogin");
+const { UserDoctor, UserPatient } = require("../models");
+const { validateLogin, validateRegistrer } = require("../utility/validateAuth");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
@@ -12,36 +12,76 @@ const genToken = (payload) =>
 exports.register = async (req, res, next) => {
   try {
     const { typeaccount } = req.params;
-    if (typeaccount === DOCTOR) {
-      const { firstName, lastName, email, password, mdId } = req.body;
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      confirmpass,
+      mdId,
+      gender,
+      citizenId,
+      birthDate,
+    } = req.body;
 
-      validateLogin(req.body);
-      const hashedPassword = await bcrypt.hash(password, 10);
+    validateRegistrer({
+      typeaccount,
+      firstName,
+      lastName,
+      email,
+      password,
+      confirmpass,
+      gender,
+      numId: mdId || citizenId,
+    });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    if (typeaccount === DOCTOR) {
       const userdoctor = await UserDoctor.create({
         firstName,
         lastName,
         email,
         password: hashedPassword,
+        gender,
         mdId,
+        birthDate,
       });
-      const token = genToken({ id: userdoctor.id, userdoctor });
+      const token = genToken({ id: userdoctor.id, typeaccount });
       return res.status(201).json({ token });
     }
     if (typeaccount === PATIENT) {
-      const { firstName, lastName, email, password, citizenId } = req.body;
-      validateLogin(req.body);
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const userpatient = await UserDoctor.create({
+      const userpatient = await UserPatient.create({
         firstName,
         lastName,
         email,
         password: hashedPassword,
+        gender,
         citizenId,
+        birthDate,
       });
-      const token = genToken({ id: userpatient.id });
+      const token = genToken({ id: userpatient.id, typeaccount });
       return res.status(201).json({ token });
     }
-    res.status(400).json({ message: "not found page" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.login = async (req, res, next) => {
+  try {
+    const { typeaccount } = req.params;
+    const { email, password } = req.body;
+    const token = await validateLogin(typeaccount, email, password);
+    res.status(200).json({ token });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getme = (req, res, next) => {
+  try {
+    res.status(201).json({ user: req.user, typeaccount: req.typeaccount });
   } catch (err) {
     next(err);
   }

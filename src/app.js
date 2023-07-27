@@ -8,6 +8,10 @@ const notFoundMiddleware = require("./middleware/notFound");
 const errorMiddleware = require("./middleware/error");
 
 const authRoute = require("./routes/authRoute");
+const opdRoute = require("./routes/opdRoute");
+const drugRoute = require("./routes/drugRoute");
+
+const authenticate = require("./middleware/authenticate");
 
 const app = express();
 
@@ -20,6 +24,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/auth", authRoute);
+app.use("/opd", authenticate, opdRoute);
+app.use("/drug", authenticate, drugRoute);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

@@ -30,16 +30,37 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: true,
         },
       },
+      gender: {
+        type: DataTypes.ENUM("MALE", "FEMALE"),
+        allowNull: false,
+      },
+      birthDate: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        validate: {
+          isDate: true,
+        },
+      },
       mdId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
         unique: true,
         validate: {
           notEmpty: true,
+          isNumeric: true,
         },
       },
     },
     { underscored: true }
   );
+
+  UserDoctor.associate = (db) => {
+    UserDoctor.hasMany(db.CaseOrder, {
+      foreignKey: { name: "doctorId" },
+      onDelete: "RESTRICT",
+      onUpdate: "RESTRICT",
+    });
+  };
+
   return UserDoctor;
 };

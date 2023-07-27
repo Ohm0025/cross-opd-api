@@ -30,16 +30,51 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: true,
         },
       },
+      gender: {
+        type: DataTypes.ENUM("MALE", "FEMALE"),
+        allowNull: false,
+      },
+      birthDate: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        validate: {
+          isDate: true,
+        },
+      },
       citizenId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
         unique: true,
         validate: {
           notEmpty: true,
+          isThaiID(value) {
+            if (value.length !== 13) {
+              throw new Error("Invalid Thai citizen ID");
+            }
+          },
         },
       },
     },
     { underscored: true }
   );
+  UserPatient.associate = (db) => {
+    UserPatient.hasMany(db.CaseOrder, {
+      foreignKey: { name: "patientId", allowNull: false },
+      onDelete: "RESTRICT",
+      onUpdate: "RESTRICT",
+    });
+
+    UserPatient.hasOne(db.WaitCase, {
+      foreignKey: { name: "patientId", allowNull: false },
+      onDelete: "RESTRICT",
+      onUpdate: "RESTRICT",
+    });
+
+    UserPatient.hasMany(db.CaseOrder, {
+      foreignKey: { name: "patientId", allowNull: false },
+      onDelete: "RESTRICT",
+      onUpdate: "RESTRICT",
+    });
+  };
   return UserPatient;
 };
