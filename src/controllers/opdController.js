@@ -2,6 +2,7 @@ const { PATIENT, DOCTOR } = require("../config/constants");
 const { UserPatient, WaitCase } = require("../models");
 const AppError = require("../utility/appError");
 const { createNewCase } = require("../utility/createNewCase");
+const { Op } = require("sequelize");
 
 exports.openOpdCard = async (req, res, next) => {
   try {
@@ -37,6 +38,7 @@ exports.getOpdCard = async (req, res, next) => {
   try {
     const typeaccount = req.typeaccount;
     const { patientId } = req.body;
+
     if (typeaccount !== DOCTOR) {
       throw new AppError("your account not allow for this feature", 400);
     }
@@ -47,8 +49,14 @@ exports.getOpdCard = async (req, res, next) => {
     if (!userPt) {
       throw new AppError("not found this patient user are waiting", 400);
     }
-    // await createNewCase()
-    res.status(201).json({ userPt });
+    const input = {
+      location: userPt.location,
+      patientId: userPt.patientId,
+      doctorId: req.user.id,
+      cc: userPt.chiefComplaintFirst,
+    };
+    const resultCase = await createNewCase(input);
+    res.status(201).json({ resultCase });
   } catch (err) {
     next(err);
   }
@@ -67,4 +75,29 @@ exports.fetchOpdCard = async (req, res, next) => {
   }
 };
 
-exports.fetchCase = async (req, res, next) => {};
+exports.deleteOpdCard = async (req, res, next) => {
+  try {
+    const { waitCaseId } = req.params;
+    const selectCase = await WaitCase.findOne({
+      where: { [Op.and]: [{ id: +waitCaseId }, { patientId: req.user.id }] },
+    });
+    if (!selectCase) {
+      throw new AppError("you not allow to delete this card", 400);
+    }
+    await selectCase.destroy();
+    res.status(201).json({ message: "delete success" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.editOpdCard = async (req, res, next) => {
+  try {
+    const { updateCase, waitCaseId } = req.body;
+
+    await WaitCase.update(updateCase, { where: { id: waitCaseId } });
+    res.status(201).json({ message: "update success" });
+  } catch (err) {
+    next(err);
+  }
+};

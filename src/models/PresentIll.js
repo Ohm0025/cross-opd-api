@@ -1,23 +1,26 @@
 module.exports = (sequelize, DataTypes) => {
-  const ChiefComplaint = sequelize.define(
-    "ChiefComplaint",
+  const PresentIll = sequelize.define(
+    "PresentIll",
     {
       title: {
         type: DataTypes.TEXT,
       },
+      piImg: {
+        type: DataTypes.STRING,
+      },
     },
-    { underscored: true }
+    { undefined: true }
   );
-  ChiefComplaint.associate = (db) => {
-    ChiefComplaint.hasOne(db.CaseOrder, {
+  PresentIll.associate = (db) => {
+    PresentIll.hasOne(db.CaseOrder, {
       foreignKey: {
-        name: "chiefComplaintId",
+        name: "presentillId",
         allowNull: false,
       },
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
     });
-    ChiefComplaint.belongsTo(db.CaseOrder, {
+    PresentIll.belongsTo(db.CaseOrder, {
       foreignKey: {
         name: "caseId",
         allowNull: false,
@@ -26,5 +29,5 @@ module.exports = (sequelize, DataTypes) => {
       onUpdate: "CASCADE",
     });
   };
-  return ChiefComplaint;
+  return PresentIll;
 };

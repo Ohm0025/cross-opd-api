@@ -1,10 +1,15 @@
+const { CaseOrder, ChiefComplaint } = require("../models");
+
 exports.createNewCase = async (input) => {
-  const CreateCase = await CaseOrder.create({
+  const newCC = await ChiefComplaint.create({
+    title: input.cc,
+  });
+  const newCase = await CaseOrder.create({
     location: input.location,
     status: "pending",
-    chiefComplaintId: input.ccId,
+    chiefComplaintId: newCC.id,
     doctorId: input.doctorId,
     patientId: input.patientId,
   });
-  return CreateCase;
+  return { newCase, newCC };
 };

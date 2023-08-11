@@ -22,10 +22,15 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   CaseOrder.associate = (db) => {
+    CaseOrder.hasOne(db.ChiefComplaint, {
+      foreignKey: { name: "caseId" },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
     CaseOrder.belongsTo(db.ChiefComplaint, {
       foreignKey: { name: "chiefComplaintId" },
-      onDelete: "RESTRICT",
-      onUpdate: "RESTRICT",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     });
     CaseOrder.belongsTo(db.UserDoctor, {
       foreignKey: {

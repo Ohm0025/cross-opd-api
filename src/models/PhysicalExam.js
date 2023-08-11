@@ -1,23 +1,29 @@
 module.exports = (sequelize, DataTypes) => {
-  const ChiefComplaint = sequelize.define(
-    "ChiefComplaint",
+  const PhysicalExam = sequelize.define(
+    "PhysicalExam",
     {
-      title: {
+      examManual: {
         type: DataTypes.TEXT,
+      },
+      examTemplate: {
+        type: DataTypes.TEXT,
+      },
+      examImg: {
+        type: DataTypes.STRING,
       },
     },
     { underscored: true }
   );
-  ChiefComplaint.associate = (db) => {
-    ChiefComplaint.hasOne(db.CaseOrder, {
+  PhysicalExam.associate = (db) => {
+    PhysicalExam.hasOne(db.CaseOrder, {
       foreignKey: {
-        name: "chiefComplaintId",
+        name: "physicalExamId",
         allowNull: false,
       },
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
     });
-    ChiefComplaint.belongsTo(db.CaseOrder, {
+    PhysicalExam.belongsTo(db.CaseOrder, {
       foreignKey: {
         name: "caseId",
         allowNull: false,
@@ -26,5 +32,5 @@ module.exports = (sequelize, DataTypes) => {
       onUpdate: "CASCADE",
     });
   };
-  return ChiefComplaint;
+  return PhysicalExam;
 };
