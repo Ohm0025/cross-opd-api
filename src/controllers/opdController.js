@@ -1,5 +1,9 @@
 const { PATIENT, DOCTOR } = require("../config/constants");
 const { UserPatient, WaitCase } = require("../models");
+const {
+  findUserInWaitList,
+  createNewWaitCase,
+} = require("../services/opdServices/openCard");
 const AppError = require("../utility/appError");
 const { createNewCase } = require("../utility/createNewCase");
 const { Op } = require("sequelize");
@@ -7,27 +11,23 @@ const { Op } = require("sequelize");
 exports.openOpdCard = async (req, res, next) => {
   try {
     const typeaccount = req.typeaccount;
+    const patientId = req.user.id;
     if (typeaccount !== PATIENT) {
       throw new AppError("your account not allow for this feature", 400);
     }
-    const { location, patientId, chiefComplaintFirst, presentIllnessFirst } =
-      req.body;
-    const userWait = await WaitCase.findOne({
-      where: { patientId },
-      include: { model: UserPatient, attributes: { exclude: "password" } },
-    });
+    const { location, chiefComplaintFirst, presentIllnessFirst } = req.body;
+
+    const userWait = await findUserInWaitList(patientId, WaitCase, UserPatient);
 
     if (userWait) {
       throw new AppError("you are waiting Now", 400);
     }
 
     //create waiting database
-    const waitCase = await WaitCase.create({
-      location,
-      patientId,
-      chiefComplaintFirst,
-      presentIllnessFirst,
-    });
+    const waitCase = await createNewWaitCase(
+      { location, patientId, chiefComplaintFirst, presentIllnessFirst },
+      WaitCase
+    );
     res.status(201).json({ waitCase });
   } catch (err) {
     next(err);
