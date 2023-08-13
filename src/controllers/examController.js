@@ -1,45 +1,88 @@
 const AppError = require("../utility/appError");
 const { Op, QueryTypes } = require("sequelize");
-const { CaseOrder, ChiefComplaint, WaitCase, sequelize } = require("../models");
+const {
+  CaseOrder,
+  ChiefComplaint,
+  PresentIll,
+  PhysicalExam,
+  LabOrder,
+  Imaging,
+  Diagnosis,
+  DetailDiag,
+  Treatment,
+  Advice,
+  FollowUp,
+  WaitCase,
+  sequelize,
+} = require("../models");
+const {
+  getPendingCase,
+  getWaitingPt,
+  createData,
+} = require("../services/examServices/activatedOpd");
 
 exports.acivatedOpd = async (req, res, next) => {
   try {
     const doctorId = req.user.id;
     const { patientId } = req.body;
 
-    const pendingCase = await sequelize.query(
-      "SELECT * FROM case_orders WHERE patient_id = ? AND status = ? AND doctor_id = ?",
-      {
-        type: QueryTypes.SELECT,
-        replacements: [patientId, "pending", doctorId],
-      }
-    );
+    const pendingCase = await getPendingCase(patientId, doctorId);
 
-    if (pendingCase[0]) {
+    if (pendingCase) {
       return res.status(201).json({ newCase: pendingCase[0] });
     }
 
-    const waitCase = await sequelize.query(
-      "SELECT * FROM wait_cases WHERE status = ? AND patient_id = ?",
-      {
-        type: QueryTypes.SELECT,
-        replacements: ["waiting", patientId],
-      }
-    );
+    const waitCase = await getWaitingPt(patientId);
 
-    if (!waitCase[0]) {
+    if (!waitCase) {
       throw new AppError("not found patientId", 404);
     }
-    const chiefComplaint = await ChiefComplaint.create({
-      title: waitCase[0]?.chief_complaint_first,
+    // const chiefComplaint = await ChiefComplaint.create({
+    //   title: waitCase[0]?.chief_complaint_first,
+    // });
+
+    const chiefComplaint = await createData(ChiefComplaint, {
+      title: waitCase?.chief_complaint_first,
     });
-    const newCase = await CaseOrder.create({
-      location: waitCase[0]?.location || "wait for error",
+
+    const presentIllness = await createData(PresentIll, {
+      title: waitCase?.present_illness_first,
+    });
+
+    const physicalExam = await createData(PhysicalExam, {});
+
+    const labOrder = await createData(LabOrder, {});
+
+    const imaging = await createData(Imaging, {});
+    const treatment = await createData(Treatment, {});
+
+    const diagnosis = await createData(Diagnosis, {
+      txId:treatment.id
+    });
+
+    const detailDiag = await createData(DetailDiag, {});
+
+
+    const followUp = await createData(FollowUp, {});
+
+    const advice = await createData(Advice, {});
+
+    const caseOrder = await createData(CaseOrder, {
+      location: waitCase?.location || "wait for error",
       status: "pending",
-      chiefComplaintId: chiefComplaint?.id,
       doctorId,
       patientId,
       type: "regular",
+      chiefComplaintId: chiefComplaint?.id,
+      presentIllId: presentIllness?.id,
+      physicalExamId: physicalExam?.id,
+      labOrderId: labOrder?.id,
+      imgOrderId: imaging?.id,
+      txId: treatment?.id,
+      diagId: diagnosis?.id,
+      detailDiagId: detailDiag?.id,
+      followUpId: followUp?.id,
+      adviceId: advice?.id,
     });
 
     await sequelize.query(
@@ -50,7 +93,7 @@ exports.acivatedOpd = async (req, res, next) => {
       }
     );
 
-    res.status(201).json({ newCase });
+    res.status(201).json({ caseOrder });
   } catch (err) {
     next(err);
   }
