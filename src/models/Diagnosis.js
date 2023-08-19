@@ -9,29 +9,22 @@ module.exports = (sequelize, DataTypes) => {
     { underscored: true }
   );
   Diagnosis.associate = (db) => {
-    Diagnosis.hasOne(db.CaseOrder, {
-      foreignKey: {
-        name: "diagId",
-        allowNull: false,
-      },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
-    });
+    //asso caseId : Mandatory
     Diagnosis.belongsTo(db.CaseOrder, {
       foreignKey: {
         name: "caseId",
         allowNull: false,
       },
       onDelete: "CASCADE",
-      onUpdate: "CASCADE",
     });
-    Diagnosis.belongsTo(db.Treatment, {
+
+    //asso treatment : optional
+    Diagnosis.hasOne(db.Treatment, {
       foreignKey: {
-        name: "txId",
+        name: "diagId",
         allowNull: false,
       },
       onDelete: "CASCADE",
-      onUpdate: "CASCADE",
     });
   };
   return Diagnosis;

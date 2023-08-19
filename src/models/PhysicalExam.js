@@ -15,21 +15,13 @@ module.exports = (sequelize, DataTypes) => {
     { underscored: true }
   );
   PhysicalExam.associate = (db) => {
-    PhysicalExam.hasOne(db.CaseOrder, {
-      foreignKey: {
-        name: "physicalExamId",
-        allowNull: false,
-      },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
-    });
+    //asso caseId : mandatory
     PhysicalExam.belongsTo(db.CaseOrder, {
       foreignKey: {
         name: "caseId",
         allowNull: false,
       },
       onDelete: "CASCADE",
-      onUpdate: "CASCADE",
     });
   };
   return PhysicalExam;

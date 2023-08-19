@@ -8,22 +8,15 @@ module.exports = (sequelize, DataTypes) => {
     },
     { underscored: true }
   );
+
   ChiefComplaint.associate = (db) => {
-    ChiefComplaint.hasOne(db.CaseOrder, {
-      foreignKey: {
-        name: "chiefComplaintId",
-        allowNull: false,
-      },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
-    });
+    //asso caseOrder : mandatory
     ChiefComplaint.belongsTo(db.CaseOrder, {
       foreignKey: {
         name: "caseId",
         allowNull: false,
       },
       onDelete: "CASCADE",
-      onUpdate: "CASCADE",
     });
   };
   return ChiefComplaint;

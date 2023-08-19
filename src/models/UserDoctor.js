@@ -56,9 +56,11 @@ module.exports = (sequelize, DataTypes) => {
 
   UserDoctor.associate = (db) => {
     UserDoctor.hasMany(db.CaseOrder, {
-      foreignKey: { name: "doctorId" },
-      onDelete: "RESTRICT",
-      onUpdate: "RESTRICT",
+      foreignKey: {
+        name: "doctorId",
+        allowNull: false,
+      },
+      onDelete: "CASCADE",
     });
   };
 

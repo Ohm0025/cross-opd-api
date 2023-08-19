@@ -19,21 +19,13 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   LabOrder.associate = (db) => {
-    LabOrder.hasOne(db.CaseOrder, {
-      foreignKey: {
-        name: "labOrderId",
-        allowNull: false,
-      },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
-    });
+    //asso caseId : mandatory
     LabOrder.belongsTo(db.CaseOrder, {
       foreignKey: {
         name: "caseId",
         allowNull: false,
       },
       onDelete: "CASCADE",
-      onUpdate: "CASCADE",
     });
   };
   return LabOrder;

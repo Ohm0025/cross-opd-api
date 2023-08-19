@@ -18,21 +18,13 @@ module.exports = (sequelize, DataTypes) => {
     { underscored: true }
   );
   Imaging.associate = (db) => {
-    Imaging.hasOne(db.CaseOrder, {
-      foreignKey: {
-        name: "imgOrderId",
-        allowNull: false,
-      },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
-    });
+    //asso caseId : Mandatory
     Imaging.belongsTo(db.CaseOrder, {
       foreignKey: {
         name: "caseId",
         allowNull: false,
       },
       onDelete: "CASCADE",
-      onUpdate: "CASCADE",
     });
   };
   return Imaging;

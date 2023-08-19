@@ -28,9 +28,9 @@ module.exports = (sequelize, DataTypes) => {
     WaitCase.belongsTo(db.UserPatient, {
       foreignKey: {
         name: "patientId",
+        allowNull: false,
       },
-      onDelete: "RESTRICT",
-      onUpdate: "RESTRICT",
+      onDelete: "CASCADE",
     });
   };
 

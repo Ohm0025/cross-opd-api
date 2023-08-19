@@ -10,21 +10,13 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   DetailDiag.asssociate = (db) => {
-    DetailDiag.hasOne(db.CaseOrder, {
-      foreignKey: {
-        name: "detailDiagId",
-        allowNull: false,
-      },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
-    });
+    //asso caseId : Mandatory
     DetailDiag.belongsTo(db.CaseOrder, {
       foreignKey: {
         name: "caseId",
         allowNull: false,
       },
       onDelete: "CASCADE",
-      onUpdate: "CASCADE",
     });
   };
   return DetailDiag;

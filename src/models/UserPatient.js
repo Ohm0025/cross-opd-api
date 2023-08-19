@@ -59,21 +59,19 @@ module.exports = (sequelize, DataTypes) => {
   );
   UserPatient.associate = (db) => {
     UserPatient.hasMany(db.CaseOrder, {
-      foreignKey: { name: "patientId", allowNull: false },
-      onDelete: "RESTRICT",
-      onUpdate: "RESTRICT",
+      foreignKey: {
+        name: "patientId",
+        allowNull: false,
+      },
+      onDelete: "CASCADE",
     });
 
     UserPatient.hasOne(db.WaitCase, {
-      foreignKey: { name: "patientId", allowNull: false },
-      onDelete: "RESTRICT",
-      onUpdate: "RESTRICT",
-    });
-
-    UserPatient.hasMany(db.CaseOrder, {
-      foreignKey: { name: "patientId", allowNull: false },
-      onDelete: "RESTRICT",
-      onUpdate: "RESTRICT",
+      foreignKey: {
+        name: "patientId",
+        allowNull: false,
+      },
+      onDelete: "CASCADE",
     });
   };
   return UserPatient;

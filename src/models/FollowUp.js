@@ -14,21 +14,13 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
   FollowUp.associate = (db) => {
-    FollowUp.hasOne(db.CaseOrder, {
-      foreignKey: {
-        name: "followUpId",
-        allowNull: false,
-      },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
-    });
+    //asso caseId : Mandatory
     FollowUp.belongsTo(db.CaseOrder, {
       foreignKey: {
         name: "caseId",
         allowNull: false,
       },
       onDelete: "CASCADE",
-      onUpdate: "CASCADE",
     });
   };
   return FollowUp;

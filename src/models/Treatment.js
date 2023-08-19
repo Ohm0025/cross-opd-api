@@ -15,13 +15,12 @@ module.exports = (sequelize, DataTypes) => {
     { underscored: true }
   );
   Treatment.associate = (db) => {
-    Treatment.hasOne(db.Diagnosis, {
+    Treatment.belongsTo(db.Diagnosis, {
       foreignKey: {
-        name: "txId",
+        name: "diagId",
         allowNull: false,
       },
       onDelete: "CASCADE",
-      onUpdate: "CASCADE",
     });
   };
   return Treatment;
