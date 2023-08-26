@@ -21,10 +21,13 @@ const {
   createData,
   updateData,
   createDiagList,
-  createList,
+
   deleteRow,
   checkExistRow,
+  createImgList,
+  createLabList,
 } = require("../services/examServices/activatedOpd");
+const { arrayToString } = require("../utility/formatData/arrayFormat");
 
 exports.acivatedOpd = async (req, res, next) => {
   try {
@@ -73,7 +76,7 @@ exports.acivatedOpd = async (req, res, next) => {
     );
 
     res.status(201).json({
-      caseOrder,
+      newCase: caseOrder,
       chiefComplaint,
       presentIllness,
     });
@@ -123,55 +126,59 @@ exports.fetchCurrentPt = async (req, res, next) => {
   }
 };
 
-exports.completeCase = async (req, res, next) => {
+exports.createRecord = async (req, res) => {
   try {
     const caseId = +req.params.caseId;
+    console.log(caseId);
     const {
       patientId,
       inputData: { cc, pi, pe, diag, img, lab, detailDx, ad, fu },
+      detailDrug,
+      detailProcedure,
     } = req.body;
-
     const waitCase = await getWaitingPt(patientId);
 
-    //speacial for diag = [{diagName , diagTx : [{tx_title , tx_type , tx_detail},...]}]
-
-    await updateData(
-      CaseOrder,
-      {
-        status: "finish",
-      },
-      { where: { id: caseId } }
-    );
-
+    //update db_caseOrder
+    // await updateData(
+    //   CaseOrder,
+    //   { status: "finish" },
+    //   { where: { id: caseId } }
+    // );
+    await CaseOrder.update({ status: "finish" }, { where: { id: caseId } });
+    //update db_chieComplaint
     await updateData(
       ChiefComplaint,
       { title: cc.title },
       { where: { caseId } }
     );
+    //update db_presentill
     await updateData(
       PresentIll,
       { title: pi.title, piImg: pi.piImg || "" },
       { where: { caseId } }
     );
-    if (checkExistRow(caseId, PhysicalExam)) {
+    //update or create db_physicalExam
+    if (await checkExistRow(caseId, PhysicalExam)) {
       await updateData(
         PhysicalExam,
         {
           examManual: pe.examManual || "",
           examTemplate: pe.examTemplate || "",
-          examImg: pe.examImg || "",
+          examImg: "",
         },
         { where: { caseId } }
       );
     } else {
+      console.log("create pe");
       await createData(PhysicalExam, {
-        examManual: pe.examManual || "",
+        exam_manual: pe.examManual || "",
         examTemplate: pe.examTemplate || "",
-        examImg: pe.examImg || "",
-        caseId,
+        examImg: "",
+        caseId: caseId,
       });
     }
-    if (checkExistRow(caseId, DetailDiag)) {
+    //update or create db_detailDiag
+    if (await checkExistRow(caseId, DetailDiag)) {
       await updateData(
         DetailDiag,
         {
@@ -185,7 +192,8 @@ exports.completeCase = async (req, res, next) => {
         caseId,
       });
     }
-    if (checkExistRow(caseId, Advice)) {
+    //update or create db_advice
+    if (await checkExistRow(caseId, Advice)) {
       await updateData(
         Advice,
         {
@@ -199,7 +207,8 @@ exports.completeCase = async (req, res, next) => {
         caseId,
       });
     }
-    if (checkExistRow(caseId, FollowUp)) {
+    //update or create db_followup
+    if (await checkExistRow(caseId, FollowUp)) {
       await updateData(
         FollowUp,
         {
@@ -219,14 +228,90 @@ exports.completeCase = async (req, res, next) => {
         caseId,
       });
     }
+    //create or update db_diag
+    createDiagList(
+      Diagnosis,
+      Treatment,
+      diag,
+      caseId,
+      detailDrug,
+      detailProcedure
+    );
+    createLabList(LabOrder, lab, caseId);
+    createImgList(Imaging, img, caseId);
 
-    createDiagList(Diagnosis, Treatment, diag, caseId);
-    createList(Imaging, img, caseId);
-    createList(LabOrder, lab, caseId);
+    //delete waitCase
     deleteRow(waitCase.id, WaitCase);
 
     res.status(201).json({ message: "create success" });
   } catch (err) {
-    next(err);
+    console.log(err);
+  }
+};
+
+exports.updatePicture = async (req, res) => {
+  try {
+    const files = req.files;
+
+    files?.pePic?.length &&
+      (await updateData(
+        PhysicalExam,
+        { examImg: arrayToString(files.pePic) },
+        { where: { caseId } }
+      ));
+
+    // lab : {name , img , status , des}
+    //labPic : [{path , fileName},{}]
+    if (files.labPic.length > 0) {
+      const listLabImg = [];
+      //create listLabImg : list of originalname
+      files.labPic.forEach((item) => {
+        if (!listLabImg.includes(item.originalname)) {
+          listLabImg.push(item.originalname);
+        }
+      });
+      //
+      listLabImg.forEach(async (item1) => {
+        const listImg = "";
+        files.labPic.forEach((item2) => {
+          if (item2.originalname === item1) {
+            listImg += item2.filename;
+            listImg += " ";
+          }
+        });
+        await updateData(
+          LabOrder,
+          { labImg: listImg },
+          { where: { caseId, labName: item1 } }
+        );
+      });
+    }
+
+    if (files.imgPic.length > 0) {
+      const listImgImg = [];
+
+      files.imgPic.forEach((item) => {
+        if (!listImgImg.includes(item.originalname)) {
+          listImgImg.push(item.originalname);
+        }
+      });
+
+      listImgImg.forEach(async (item1) => {
+        const listImg = "";
+        files.imgPic.forEach((item2) => {
+          if (item2.originalname === item1) {
+            listImg += item2.filename;
+            listImg += " ";
+          }
+        });
+        await updateData(
+          Imaging,
+          { imgImg: listImg },
+          { where: { caseId, imgName: item1 } }
+        );
+      });
+    }
+  } catch (err) {
+    console.log(err);
   }
 };

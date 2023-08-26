@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
     },
     fuDate: {
-      type: DataTypes.DATEONLY,
+      type: DataTypes.STRING,
     },
   });
   FollowUp.associate = (db) => {

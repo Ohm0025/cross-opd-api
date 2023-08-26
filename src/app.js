@@ -13,6 +13,8 @@ const drugRoute = require("./routes/drugRoute");
 const examRoute = require("./routes/examRoute");
 
 const authenticate = require("./middleware/authenticate");
+const uploadMiddleware = require("./middleware/uploadMiddleWare");
+const { testUploadImg } = require("./controllers/testController");
 
 const app = express();
 
@@ -51,12 +53,14 @@ if (process.env.NODE_ENV === "development") {
 
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authRoute);
 app.use("/opd", authenticate, opdRoute);
 app.use("/drug", authenticate, drugRoute);
 app.use("/exam", authenticate, examRoute);
+
+app.post("/testupload", uploadMiddleware, testUploadImg);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

@@ -1,12 +1,12 @@
 const { sequelize } = require("../../models");
-const { QueryTypes } = require("sequelize");
+const { QueryTypes, Op } = require("sequelize");
 
 exports.getPendingCase = async (patientId, doctorId) => {
   const pendingCase = await sequelize.query(
-    "SELECT * FROM case_orders WHERE patient_id = ? AND status = ? AND doctor_id = ?",
+    "SELECT * FROM case_orders WHERE patient_id = ? AND doctor_id = ?",
     {
       type: QueryTypes.SELECT,
-      replacements: [patientId, "pending", doctorId],
+      replacements: [patientId, doctorId],
     }
   );
   return pendingCase[0];
@@ -35,53 +35,114 @@ exports.updateData = async (db_name, db_update, option) => {
 
 exports.checkExistRow = async (id, db_check) => {
   const result = await db_check.findOne({
-    where: { caseId: id },
+    where: { [Op.or]: [{ caseId: id }] },
   });
+
   return result ? true : false;
 };
 
-exports.createDiagList = (db_diag, db_tx, db_update_array, caseId) => {
-  db_update_array.forEach(async (element) => {
-    if (this.checkExistRow(caseId, db_diag)) {
-      await db_diag.update(
-        {
-          diagName: element.diagName,
-        },
-        { where: { caseId } }
-      );
+exports.createDiagList = async (
+  db_diag,
+  db_tx,
+  db_update_array,
+  caseId,
+  detailDrug,
+  detailProcedure
+) => {
+  await db_diag.destroy({ where: { caseId } });
 
-      element?.diagTx?.forEach(async (item) => {
-        await db_tx.update(
-          {
-            txTitle: item.txTitle,
-            txType: item.txType,
-            txDetail: item.txDetail,
-          },
-          { where: { caseId } }
-        );
-      });
-    } else {
-      const newDiag = await db_diag.create({
-        diagName: element.diagName,
-        caseId,
-      });
+  db_update_array.forEach(async (item1) => {
+    await db_diag.create({
+      diagName: item1,
+      caseId,
+    });
 
-      element?.diagTx?.forEach(async (item) => {
+    const selectedDiag = await db_diag.findOne({
+      where: { [Op.and]: [{ caseId }, { diagName: item1 }] },
+    });
+
+    selectedDiag &&
+      (await db_tx.destroy({ where: { diagId: selectedDiag?.id } }));
+
+    detailDrug.forEach(async (item2) => {
+      if (item1 === item2.diagTitle) {
         await db_tx.create({
-          txTitle: item.txTitle,
-          txType: item.txType,
-          txDetail: item.txDetail,
-          diagId: newDiag.id,
+          txTitle: item2.title,
+          txType: "drug",
+          txDetail: item2.use + " " + item2.amount,
+          diagId: selectedDiag?.id,
         });
-      });
-    }
+      }
+    });
+    detailProcedure.forEach(async (item2) => {
+      if (item1 === item2.diagTitle) {
+        await db_tx.create({
+          txTitle: item2.proceduce,
+          txType: "proceduce",
+          txDetail: item2.procedist,
+          diagId: selectedDiag.id,
+        });
+      }
+    });
+
+    console.log("create diag");
   });
 };
 
-exports.createList = (db_name, db_list, caseId) => {
-  db_list.forEach(async (item) => {
-    await db_name.create(db_name, { ...item, caseId });
-  });
+exports.createLabList = (db_name, db_list, caseId) => {
+  if (this.checkExistRow(caseId, db_name)) {
+    db_list.forEach(async (item) => {
+      await db_name.update(
+        {
+          labName: item.name,
+          labStatus: item.status,
+          labDescript: item.des,
+          labImg: "",
+        },
+        {
+          where: { case_id: caseId },
+        }
+      );
+    });
+  } else {
+    db_list.forEach(async (item) => {
+      await db_name.create({
+        labName: item.name,
+        labStatus: item.status,
+        labDescript: item.des,
+        labImg: "",
+        case_id: caseId,
+      });
+    });
+  }
+};
+
+exports.createImgList = (db_name, db_list, caseId) => {
+  if (this.checkExistRow(caseId, db_name)) {
+    db_list.forEach(async (item) => {
+      await db_name.update(
+        {
+          imgName: item.name,
+          imgStatus: item.status,
+          imgDescript: item.des,
+          imgImg: "",
+        },
+        {
+          where: { caseId },
+        }
+      );
+    });
+  } else {
+    db_list.forEach(async (item) => {
+      await db_name.create({
+        imgName: item.name,
+        imgStatus: item.status,
+        imgDescript: item.des,
+        imgImg: "",
+        caseId,
+      });
+    });
+  }
 };
 
 exports.deleteRow = async (rowId, db_name) => {
