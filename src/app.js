@@ -11,6 +11,7 @@ const authRoute = require("./routes/authRoute");
 const opdRoute = require("./routes/opdRoute");
 const drugRoute = require("./routes/drugRoute");
 const examRoute = require("./routes/examRoute");
+const pastRoute = require("./routes/pastRoute");
 
 const authenticate = require("./middleware/authenticate");
 const uploadMiddleware = require("./middleware/uploadMiddleWare");
@@ -59,6 +60,7 @@ app.use("/auth", authRoute);
 app.use("/opd", authenticate, opdRoute);
 app.use("/drug", authenticate, drugRoute);
 app.use("/exam", authenticate, examRoute);
+app.use("/getPast", authenticate, pastRoute);
 
 app.post("/testupload", uploadMiddleware, testUploadImg);
 
