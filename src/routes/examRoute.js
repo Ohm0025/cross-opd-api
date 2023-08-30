@@ -10,5 +10,10 @@ router.get("/finish", examController.fetchFinishCase);
 router.get("/unfinish", examController.fetchUnfinishCase);
 router.post(`/${":caseId"}`, examController.fetchCurrentPt);
 router.post("/:caseId/createRecord", examController.createRecord);
+router.post(
+  "/:caseId/uppicture",
+  uploadMiddleWare,
+  examController.updatePicture
+);
 
 module.exports = router;

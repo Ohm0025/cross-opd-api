@@ -3,6 +3,7 @@ const { UserDoctor, UserPatient } = require("../models");
 const { validateLogin, validateRegistrer } = require("../utility/validateAuth");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const { generateToken } = require("../services/authServices/login");
 
 const genToken = (payload) =>
   jwt.sign(payload, process.env.JWT_SECRET_KEY || "private_key", {
@@ -72,7 +73,10 @@ exports.login = async (req, res, next) => {
   try {
     const { typeaccount } = req.params;
     const { email, password } = req.body;
-    const token = await validateLogin(typeaccount, email, password);
+
+    await validateLogin(typeaccount, email, password);
+    const token = await generateToken(typeaccount, email);
+
     res.status(200).json({ token });
   } catch (err) {
     next(err);

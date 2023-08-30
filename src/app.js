@@ -56,6 +56,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+//app.use("/image", express.static("image"));
+app.use(express.static("public"));
+
 app.use("/auth", authRoute);
 app.use("/opd", authenticate, opdRoute);
 app.use("/drug", authenticate, drugRoute);

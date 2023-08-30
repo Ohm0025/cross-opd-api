@@ -3,13 +3,7 @@ const { UserDoctor, UserPatient } = require("../models");
 const AppError = require("./appError");
 const validator = require("validator");
 
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-
-const genToken = (payload) =>
-  jwt.sign(payload, process.env.JWT_SECRET_KEY || "private_key", {
-    expiresIn: process.env.JWT_EXPIRES || "1d",
-  });
 
 exports.validateRegistrer = (obj) => {
   const {
@@ -55,24 +49,20 @@ exports.validateLogin = async (typeaccount, email, password) => {
   if (typeaccount === DOCTOR) {
     const userdoctor = await UserDoctor.findOne({ where: { email } });
     if (!userdoctor) {
-      throw new AppError("email is invalid", 400);
+      throw new AppError("email is incorrect or no this user", 400);
     }
     const isCorrect = await bcrypt.compare(password, userdoctor.password);
     if (!isCorrect) {
       throw new AppError("password is incorrect.", 400);
     }
-    const token = genToken({ id: userdoctor.id, typeaccount });
-    return token;
   } else if (typeaccount === PATIENT) {
     const userpatient = await UserPatient.findOne({ where: { email } });
     if (!userpatient) {
-      throw new AppError("email is invalid", 400);
+      throw new AppError("email is incorrect or no this user", 400);
     }
     const isCorrect = await bcrypt.compare(password, userpatient.password);
     if (!isCorrect) {
       throw new AppError("password is incorrect.", 400);
     }
-    const token = genToken({ id: userpatient.id, typeaccount });
-    return token;
   }
 };

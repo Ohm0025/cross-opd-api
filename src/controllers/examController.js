@@ -116,8 +116,21 @@ exports.fetchCurrentPt = async (req, res, next) => {
     const currentCase = await CaseOrder.findOne({
       where: { id: caseId },
       include: [
-        { model: ChiefComplaint, where: { caseId } },
-        { model: PresentIll, where: { caseId } },
+        { model: ChiefComplaint, attributes: ["title"], where: { caseId } },
+        { model: PresentIll, attributes: ["title"], where: { caseId } },
+        {
+          model: PhysicalExam,
+          attributes: ["examManual", "examTemplate", "examImg"],
+          where: { caseId },
+        },
+        { model: Diagnosis, attributes: ["diagName"], where: { caseId } },
+        { model: DetailDiag, attributes: ["detail"], where: { caseId } },
+        { model: Advice, attributes: ["detail"], where: { caseId } },
+        {
+          model: FollowUp,
+          attributes: ["fuHos", "fuOPD", "fuDetail", "fuDate"],
+          where: { caseId },
+        },
       ],
     });
     res.status(201).json({ currentCase });
@@ -129,7 +142,7 @@ exports.fetchCurrentPt = async (req, res, next) => {
 exports.createRecord = async (req, res) => {
   try {
     const caseId = +req.params.caseId;
-    console.log(caseId);
+
     const {
       patientId,
       inputData: { cc, pi, pe, diag, img, lab, detailDx, ad, fu },
@@ -251,21 +264,22 @@ exports.createRecord = async (req, res) => {
 
 exports.updatePicture = async (req, res) => {
   try {
-    const files = req.files;
+    const { pePic, labPic, imgPic } = req.files;
+    const caseId = +req.params.caseId;
 
-    files?.pePic?.length &&
+    pePic?.length > 0 &&
       (await updateData(
         PhysicalExam,
-        { examImg: arrayToString(files.pePic) },
+        { examImg: arrayToString(pePic) },
         { where: { caseId } }
       ));
 
     // lab : {name , img , status , des}
     //labPic : [{path , fileName},{}]
-    if (files.labPic.length > 0) {
+    if (labPic?.length > 0) {
       const listLabImg = [];
       //create listLabImg : list of originalname
-      files.labPic.forEach((item) => {
+      labPic.forEach((item) => {
         if (!listLabImg.includes(item.originalname)) {
           listLabImg.push(item.originalname);
         }
@@ -273,7 +287,7 @@ exports.updatePicture = async (req, res) => {
       //
       listLabImg.forEach(async (item1) => {
         const listImg = "";
-        files.labPic.forEach((item2) => {
+        labPic.forEach((item2) => {
           if (item2.originalname === item1) {
             listImg += item2.filename;
             listImg += " ";
@@ -287,10 +301,10 @@ exports.updatePicture = async (req, res) => {
       });
     }
 
-    if (files.imgPic.length > 0) {
+    if (imgPic?.length > 0) {
       const listImgImg = [];
 
-      files.imgPic.forEach((item) => {
+      imgPic.forEach((item) => {
         if (!listImgImg.includes(item.originalname)) {
           listImgImg.push(item.originalname);
         }
@@ -298,7 +312,7 @@ exports.updatePicture = async (req, res) => {
 
       listImgImg.forEach(async (item1) => {
         const listImg = "";
-        files.imgPic.forEach((item2) => {
+        imgPic.forEach((item2) => {
           if (item2.originalname === item1) {
             listImg += item2.filename;
             listImg += " ";
