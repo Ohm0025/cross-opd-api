@@ -33,6 +33,17 @@ const uploadMiddleware = (req, res, next) => {
     {
       name: "imgPic",
     },
+    {
+      name: "oldPePic",
+    },
+    {
+      name: "inputData",
+    },
+    {
+      name: "patientId",
+    },
+    { name: "detailDrug" },
+    { name: "detailProceduce" },
   ])(req, res, (err) => {
     if (err) {
       return res.status(400).json({ error: err.message });

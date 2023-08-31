@@ -13,7 +13,8 @@ router.post("/:caseId/createRecord", examController.createRecord);
 router.post(
   "/:caseId/uppicture",
   uploadMiddleWare,
-  examController.updatePicture
+  examController.updatePicture,
+  examController.createRecord
 );
 
 module.exports = router;

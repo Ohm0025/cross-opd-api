@@ -53,19 +53,37 @@ exports.acivatedOpd = async (req, res, next) => {
       type: "regular",
     });
 
-    const chiefComplaint =
-      waitCase?.chief_complaint_first &&
-      (await createData(ChiefComplaint, {
-        title: waitCase?.chief_complaint_first,
-        caseId: caseOrder.id,
-      }));
+    const chiefComplaint = await createData(ChiefComplaint, {
+      title: waitCase?.chief_complaint_first || "",
+      caseId: caseOrder.id,
+    });
 
-    const presentIllness =
-      waitCase?.present_illness_first &&
-      (await createData(PresentIll, {
-        title: waitCase?.present_illness_first,
-        caseId: caseOrder.id,
-      }));
+    const presentIllness = await createData(PresentIll, {
+      title: waitCase?.present_illness_first || "",
+      caseId: caseOrder.id,
+    });
+
+    const physicalExam = await createData(PhysicalExam, {
+      caseId: caseOrder.id,
+    });
+    const labOrder = await createData(LabOrder, {
+      caseId: caseOrder.id,
+    });
+    const imaging = await createData(Imaging, {
+      caseId: caseOrder.id,
+    });
+    const diagnosis = await createData(Diagnosis, {
+      caseId: caseOrder.id,
+    });
+    const detailDx = await createData(DetailDiag, {
+      caseId: caseOrder.id,
+    });
+    const advice = await createData(Advice, {
+      caseId: caseOrder.id,
+    });
+    const followup = await createData(FollowUp, {
+      caseId: caseOrder.id,
+    });
 
     await sequelize.query(
       "UPDATE wait_cases SET status = ? WHERE status = ? AND patient_id = ?",
@@ -112,6 +130,14 @@ exports.fetchUnfinishCase = async (req, res, next) => {
 exports.fetchCurrentPt = async (req, res, next) => {
   try {
     const caseId = +req.params.caseId;
+    // const currentCase = await sequelize.query(
+    //   "SELECT * FROM case_orders LEFT JOIN chief_complaints ON chief_complaints.case_id = case_orders.id WHERE case_orders.id = ? LIMIT 1;",
+    //   {
+    //     type: QueryTypes.SELECT,
+    //     replacements: [caseId],
+    //     raw: true,
+    //   }
+    // );
 
     const currentCase = await CaseOrder.findOne({
       where: { id: caseId },
@@ -133,24 +159,24 @@ exports.fetchCurrentPt = async (req, res, next) => {
         },
       ],
     });
+
     res.status(201).json({ currentCase });
   } catch (err) {
     next(err);
   }
 };
 
-exports.createRecord = async (req, res) => {
+exports.createRecord = async (req, res, next) => {
   try {
     const caseId = +req.params.caseId;
-
-    const {
-      patientId,
-      inputData: { cc, pi, pe, diag, img, lab, detailDx, ad, fu },
-      detailDrug,
-      detailProcedure,
-    } = req.body;
+    console.log(req.body);
+    const { patientId, inputData, detailDrug, detailProcedure } = req.body;
     const waitCase = await getWaitingPt(patientId);
 
+    const { cc, pi, pe, diag, img, lab, detailDx, ad, fu } =
+      JSON.parse(inputData);
+
+    console.log(req.body);
     //update db_caseOrder
     // await updateData(
     //   CaseOrder,
@@ -242,57 +268,64 @@ exports.createRecord = async (req, res) => {
       });
     }
     //create or update db_diag
-    createDiagList(
-      Diagnosis,
-      Treatment,
-      diag,
-      caseId,
-      detailDrug,
-      detailProcedure
-    );
+    // createDiagList(
+    //   Diagnosis,
+    //   Treatment,
+    //   diag,
+    //   caseId,
+    //   detailDrug,
+    //   detailProcedure
+    // );
     createLabList(LabOrder, lab, caseId);
     createImgList(Imaging, img, caseId);
 
     //delete waitCase
-    deleteRow(waitCase.id, WaitCase);
+    //deleteRow(waitCase.id, WaitCase);
 
-    res.status(201).json({ message: "create success" });
+    res.status(201).json({ message: "create complete" });
   } catch (err) {
-    console.log(err);
+    next(err);
   }
 };
 
-exports.updatePicture = async (req, res) => {
+exports.updatePicture = async (req, res, next) => {
   try {
     const { pePic, labPic, imgPic } = req.files;
     const caseId = +req.params.caseId;
 
-    pePic?.length > 0 &&
-      (await updateData(
-        PhysicalExam,
-        { examImg: arrayToString(pePic) },
-        { where: { caseId } }
-      ));
+    console.log(labPic);
+
+    pePic?.length > 0
+      ? await updateData(
+          PhysicalExam,
+          { examImg: req.body.oldPePic + arrayToString(pePic) },
+          { where: { caseId } }
+        )
+      : await updateData(
+          PhysicalExam,
+          { examImg: req.body.oldPePic },
+          { where: { caseId } }
+        );
 
     // lab : {name , img , status , des}
     //labPic : [{path , fileName},{}]
     if (labPic?.length > 0) {
-      const listLabImg = [];
+      const listLabImg = {};
       //create listLabImg : list of originalname
-      labPic.forEach((item) => {
-        if (!listLabImg.includes(item.originalname)) {
-          listLabImg.push(item.originalname);
+      labPic.forEach(async (item) => {
+        if (!listLabImg.hasOwnProperty(item.originalname)) {
+          listLabImg[item.originalname] = {};
         }
       });
       //
-      listLabImg.forEach(async (item1) => {
-        const listImg = "";
+      Object.keys(listLabImg).forEach(async (item1) => {
+        let listImg = "";
         labPic.forEach((item2) => {
           if (item2.originalname === item1) {
-            listImg += item2.filename;
-            listImg += " ";
+            listImg += item2.filename + " ";
           }
         });
+        console.log(listImg);
         await updateData(
           LabOrder,
           { labImg: listImg },
@@ -314,8 +347,7 @@ exports.updatePicture = async (req, res) => {
         const listImg = "";
         imgPic.forEach((item2) => {
           if (item2.originalname === item1) {
-            listImg += item2.filename;
-            listImg += " ";
+            listImg += item2.filename + " ";
           }
         });
         await updateData(
@@ -325,7 +357,8 @@ exports.updatePicture = async (req, res) => {
         );
       });
     }
+    next();
   } catch (err) {
-    console.log(err);
+    next(err);
   }
 };
