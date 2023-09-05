@@ -2,16 +2,7 @@ module.exports = (sequelize, DataTypes) => {
   const Imaging = sequelize.define(
     "Imaging",
     {
-      imgName: {
-        type: DataTypes.STRING,
-      },
-      imgStatus: {
-        type: DataTypes.ENUM("pending", "complete"),
-      },
-      imgImg: {
-        type: DataTypes.STRING,
-      },
-      imgDescript: {
+      imgArray: {
         type: DataTypes.TEXT,
       },
     },

@@ -1,5 +1,5 @@
 const { PATIENT, DOCTOR } = require("../config/constants");
-const { UserPatient, WaitCase } = require("../models");
+const { UserPatient, WaitCase, CaseOrder } = require("../models");
 const {
   findUserInWaitList,
   createNewWaitCase,
@@ -17,7 +17,12 @@ exports.openOpdCard = async (req, res, next) => {
     }
     const { location, chiefComplaintFirst, presentIllnessFirst } = req.body;
 
-    const userWait = await findUserInWaitList(patientId, WaitCase, UserPatient);
+    const userWait = await findUserInWaitList(
+      patientId,
+      WaitCase,
+      CaseOrder,
+      UserPatient
+    );
 
     if (userWait) {
       throw new AppError("you are waiting Now", 400);
@@ -62,6 +67,7 @@ exports.getOpdCard = async (req, res, next) => {
   }
 };
 
+//fetch opd card ของ patient
 exports.fetchOpdCard = async (req, res, next) => {
   try {
     const { patientId } = req.body;

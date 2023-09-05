@@ -130,14 +130,6 @@ exports.fetchUnfinishCase = async (req, res, next) => {
 exports.fetchCurrentPt = async (req, res, next) => {
   try {
     const caseId = +req.params.caseId;
-    // const currentCase = await sequelize.query(
-    //   "SELECT * FROM case_orders LEFT JOIN chief_complaints ON chief_complaints.case_id = case_orders.id WHERE case_orders.id = ? LIMIT 1;",
-    //   {
-    //     type: QueryTypes.SELECT,
-    //     replacements: [caseId],
-    //     raw: true,
-    //   }
-    // );
 
     const currentCase = await CaseOrder.findOne({
       where: { id: caseId },

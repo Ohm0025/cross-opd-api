@@ -44,14 +44,14 @@ const uploadMiddleware = (req, res, next) => {
     },
     { name: "detailDrug" },
     { name: "detailProceduce" },
+    { name: "oldLabPic" },
+    { name: "oldImgPic" },
   ])(req, res, (err) => {
     if (err) {
       return res.status(400).json({ error: err.message });
     }
     //retrive uploaded files
     const files = req.files;
-
-    console.log(files);
 
     //proceed to the next middleware or route handler
     next();

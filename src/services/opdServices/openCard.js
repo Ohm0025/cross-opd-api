@@ -1,8 +1,17 @@
-exports.findUserInWaitList = async (patientId, WaitCase, UserPatient) => {
-  const userWait = await WaitCase.findOne({
-    where: { patientId },
-    include: { model: UserPatient, attributes: { exclude: "password" } },
-  });
+exports.findUserInWaitList = async (
+  patientId,
+  WaitCase,
+  CaseOrder,
+  UserPatient
+) => {
+  const userWait =
+    (await WaitCase.findOne({
+      where: { patientId },
+      include: { model: UserPatient, attributes: { exclude: "password" } },
+    })) ||
+    (await CaseOrder.findOne({
+      where: { patientId, status: "pending" },
+    }));
 
   return userWait;
 };
