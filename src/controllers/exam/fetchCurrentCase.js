@@ -8,12 +8,15 @@ const {
   LabOrder,
   Imaging,
   Advice,
+  Treatment,
   FollowUp,
+  UserPatient,
 } = require("../../models");
 
 exports.fetchCurrentCase = async (req, res, next) => {
   try {
     const caseId = +req.params.caseId;
+
     // const currentCase = await sequelize.query(
     //   "SELECT * FROM case_orders LEFT JOIN chief_complaints ON chief_complaints.case_id = case_orders.id WHERE case_orders.id = ? LIMIT 1;",
     //   {
@@ -34,6 +37,7 @@ exports.fetchCurrentCase = async (req, res, next) => {
           where: { caseId },
         },
         { model: Diagnosis, attributes: ["diagName"], where: { caseId } },
+        { model: Treatment, attributes: ["txList"], where: { caseId } },
         { model: DetailDiag, attributes: ["detail"], where: { caseId } },
         { model: Advice, attributes: ["detail"], where: { caseId } },
         {
@@ -54,7 +58,14 @@ exports.fetchCurrentCase = async (req, res, next) => {
       ],
     });
 
-    res.status(201).json({ currentCase });
+    const patientObj = await UserPatient.findOne({
+      where: { id: currentCase.patientId },
+      attributes: {
+        exclude: ["password"],
+      },
+    });
+
+    res.status(201).json({ currentCase, patientObj });
   } catch (err) {
     next(err);
   }

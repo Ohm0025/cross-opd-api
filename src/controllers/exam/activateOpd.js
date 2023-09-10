@@ -7,6 +7,7 @@ const {
   Imaging,
   Diagnosis,
   DetailDiag,
+  Treatment,
   Advice,
   FollowUp,
   WaitCase,
@@ -93,6 +94,11 @@ exports.acivateOpd = async (req, res, next) => {
 
     //สร้าง row detail diag
     const detailDx = await createData(DetailDiag, {
+      caseId: caseOrder.id,
+    });
+
+    //สร้าง row treatment
+    const treatment = await createData(Treatment, {
       caseId: caseOrder.id,
     });
 

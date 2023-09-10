@@ -17,15 +17,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       onDelete: "CASCADE",
     });
-
-    //asso treatment : optional
-    Diagnosis.hasOne(db.Treatment, {
-      foreignKey: {
-        name: "diagId",
-        allowNull: false,
-      },
-      onDelete: "CASCADE",
-    });
   };
   return Diagnosis;
 };

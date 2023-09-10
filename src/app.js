@@ -27,7 +27,7 @@ const io = require("socket.io")(server, {
   },
 });
 
-const waitingPatient = [];
+let waitingPatient = [];
 
 const addNewPatient = (patientId, socketId) => {
   !waitingPatient.some((user) => user.patientId === patientId) &&
@@ -44,14 +44,25 @@ io.on("connection", (socket) => {
       (item) => item.patientId === +patientId
     );
 
-    io.emit("changeStatus", "inprogress");
+    selectedCase && io.emit("changeStatus", "inprogress");
+  });
+
+  socket.on("finishCase", (patientId) => {
+    waitingPatient = waitingPatient.filter(
+      (item) => item.patientId !== +patientId
+    );
+    let selectedCase = waitingPatient.find(
+      (item) => item.patientId === +patientId
+    );
+
+    io.emit("closeStatus", "closeCase");
   });
 });
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
-
+console.log(waitingPatient);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

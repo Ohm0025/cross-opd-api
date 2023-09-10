@@ -63,7 +63,15 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     //diag : Mandatory
-    CaseOrder.hasMany(db.Diagnosis, {
+    CaseOrder.hasOne(db.Diagnosis, {
+      foreignKey: {
+        name: "caseId",
+        allowNull: false,
+      },
+    });
+
+    //treatment
+    CaseOrder.hasOne(db.Treatment, {
       foreignKey: {
         name: "caseId",
         allowNull: false,

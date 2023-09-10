@@ -2,22 +2,18 @@ module.exports = (sequelize, DataTypes) => {
   const Treatment = sequelize.define(
     "Treatment",
     {
-      txTitle: {
-        type: DataTypes.STRING,
-      },
-      txType: {
-        type: DataTypes.ENUM("drug", "proceduce", "other"),
-      },
-      txDetail: {
-        type: DataTypes.STRING,
+      //{diag1:{title:"" , type:" " , detail:" " , diagName:" "} , diag2:{title:"" , type:" " , detail:" " , diagName:" "}}
+      txList: {
+        type: DataTypes.TEXT,
       },
     },
     { underscored: true }
   );
   Treatment.associate = (db) => {
-    Treatment.belongsTo(db.Diagnosis, {
+    //asso caseId : Mandatory
+    Treatment.belongsTo(db.CaseOrder, {
       foreignKey: {
-        name: "diagId",
+        name: "caseId",
         allowNull: false,
       },
       onDelete: "CASCADE",

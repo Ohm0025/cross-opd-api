@@ -5,10 +5,12 @@ const {
   PhysicalExam,
   LabOrder,
   Imaging,
+  Diagnosis,
   DetailDiag,
   Advice,
   FollowUp,
   WaitCase,
+  Treatment,
 } = require("../../models");
 const {
   getWaitingPt,
@@ -26,7 +28,7 @@ exports.createRecord = async (req, res, next) => {
     const { patientId, inputData, detailDrug, detailProcedure } = req.body;
     const waitCase = await getWaitingPt(patientId);
 
-    const { cc, pi, pe, diag, img, lab, detailDx, ad, fu } =
+    const { cc, pi, pe, diag, img, lab, detailDx, ad, fu, tx } =
       JSON.parse(inputData);
 
     //update db_caseOrder
@@ -78,6 +80,25 @@ exports.createRecord = async (req, res, next) => {
           { where: { caseId } }
         );
 
+    //update diag
+    await updateData(
+      Diagnosis,
+      {
+        diagName: JSON.stringify(diag),
+      },
+      { where: { caseId } }
+    );
+
+    //update treatment
+    await updateData(
+      Treatment,
+      {
+        txList: JSON.stringify(tx),
+      },
+      {
+        where: { caseId },
+      }
+    );
     //update or create db_detailDiag
     if (await checkExistRow(caseId, DetailDiag)) {
       await updateData(
@@ -144,7 +165,7 @@ exports.createRecord = async (req, res, next) => {
         }
       });
     });
-    console.log(uploadLab);
+
     await updateData(
       LabOrder,
       {

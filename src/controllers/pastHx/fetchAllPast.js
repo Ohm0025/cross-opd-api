@@ -10,16 +10,17 @@ const {
   Treatment,
   Advice,
   FollowUp,
-} = require("../models");
+  UserDoctor,
+} = require("../../models");
 
 exports.fetchAllPast = async (req, res, next) => {
   try {
     const allPastCase = await CaseOrder.findAll({
-      attributes: ["id", "updatedAt"],
+      attributes: ["id", "updatedAt", "doctorId"],
       where: { patientId: req.body.patientId },
     });
     const lastPastCase = await CaseOrder.findOne({
-      attributes: ["id", "updatedAt"],
+      attributes: ["id", "updatedAt", "location"],
       include: [
         {
           model: ChiefComplaint,
@@ -42,20 +43,6 @@ exports.fetchAllPast = async (req, res, next) => {
             caseId: allPastCase[0].id,
           },
         },
-        // {
-        //   model: LabOrder,
-        //   attributes: ["labName", "labStatus", "labImg", "labDescript"],
-        //   where: {
-        //     caseId: allPastCase[0].id,
-        //   },
-        // },
-        // {
-        //   model: Imaging,
-        //   attributes: ["imgName", "imgStatus", "imgImg", "imgDescript"],
-        //   where: {
-        //     caseId: allPastCase[0].id,
-        //   },
-        // },
         {
           model: Diagnosis,
           attributes: ["diagName"],
@@ -66,6 +53,20 @@ exports.fetchAllPast = async (req, res, next) => {
         {
           model: DetailDiag,
           attributes: ["detail"],
+          where: {
+            caseId: allPastCase[0].id,
+          },
+        },
+        {
+          model: LabOrder,
+          attributes: ["labArray"],
+          where: {
+            caseId: allPastCase[0].id,
+          },
+        },
+        {
+          model: Imaging,
+          attributes: ["imgArray"],
           where: {
             caseId: allPastCase[0].id,
           },
@@ -82,6 +83,20 @@ exports.fetchAllPast = async (req, res, next) => {
           attributes: ["fuHos", "fuOPD", "fuDetail", "fuDate"],
           where: {
             caseId: allPastCase[0].id,
+          },
+        },
+        {
+          model: Treatment,
+          attributes: ["txList"],
+          where: {
+            caseId: allPastCase[0].id,
+          },
+        },
+        {
+          model: UserDoctor,
+          attributes: ["firstName", "lastName"],
+          where: {
+            id: allPastCase[0].doctorId,
           },
         },
       ],

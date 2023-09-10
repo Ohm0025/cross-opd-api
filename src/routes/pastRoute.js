@@ -1,8 +1,12 @@
 const express = require("express");
-const pastController = require("../controllers/pastController");
+const { fetchAllPast } = require("../controllers/pastHx/fetchAllPast");
+const {
+  fetchSelectedPast,
+} = require("../controllers/pastHx/fetchSelectedPast");
 
 const router = express.Router();
 
-router.post("/", pastController.fetchAllPast);
+router.post("/", fetchAllPast);
+router.post("/selectedPast", fetchSelectedPast);
 
 module.exports = router;
