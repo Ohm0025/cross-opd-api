@@ -12,6 +12,7 @@ const {
   FollowUp,
   UserPatient,
 } = require("../../models");
+const AppError = require("../../utility/appError");
 
 exports.fetchCurrentCase = async (req, res, next) => {
   try {
@@ -57,6 +58,10 @@ exports.fetchCurrentCase = async (req, res, next) => {
         },
       ],
     });
+
+    if (!currentCase) {
+      throw new AppError("have no this patient.", 400);
+    }
 
     const patientObj = await UserPatient.findOne({
       where: { id: currentCase.patientId },

@@ -12,6 +12,12 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: true,
         },
       },
+      treatmentList: {
+        type: DataTypes.TEXT,
+      },
+      followUp: {
+        type: DataTypes.STRING,
+      },
     },
     {
       underscored: true,
@@ -20,14 +26,12 @@ module.exports = (sequelize, DataTypes) => {
 
   Underlying.associate = (db) => {
     Underlying.belongsTo(db.UserPatient, {
-      foreignKey: { name: "patientId" },
-      onDelete: "RESTRICT",
-      onUpdate: "RESTRICT",
+      foreignKey: { name: "patientId", allowNull: false },
+      onDelete: "CASCADE",
     });
-    Underlying.belongsTo(db.CaseOrder, {
-      foreignKey: { name: "caseId" },
-      onDelete: "RESTRICT",
-      onUpdate: "RESTRICT",
+    Underlying.belongsTo(db.UserDoctor, {
+      foreignKey: { name: "doctorId", allowNull: false },
+      onDelete: "CASCADE",
     });
   };
   return Underlying;

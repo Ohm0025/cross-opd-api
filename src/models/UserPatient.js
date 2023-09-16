@@ -54,6 +54,9 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
+      underlying: {
+        type: DataTypes.TEXT,
+      },
     },
     { underscored: true }
   );
