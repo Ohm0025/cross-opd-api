@@ -3,15 +3,16 @@ const { QueryTypes, Op } = require("sequelize");
 const { changeTimeZone } = require("../../utility/formatData/formatTime");
 
 exports.getPendingCase = async (patientId, doctorId) => {
-  let today = changeTimeZone(new Date(), "Asia/Bangkok");
+  // let today = changeTimeZone(new Date(), "Asia/Bangkok");
+  let today = new Date();
   let day = 60 * 60 * 24 * 1000;
   let tomorrow = new Date(today.getTime() + day);
   let yesterday = new Date(today.getTime() - day);
   const pendingCase = await sequelize.query(
-    "SELECT * FROM case_orders WHERE patient_id = ? AND doctor_id = ? AND created_at BETWEEN ? AND ?",
+    "SELECT * FROM case_orders WHERE patient_id = ? AND status = ? AND doctor_id = ? AND created_at BETWEEN ? AND ?",
     {
       type: QueryTypes.SELECT,
-      replacements: [patientId, doctorId, tomorrow, yesterday],
+      replacements: [patientId, "pending", doctorId, yesterday, tomorrow],
     }
   );
   return pendingCase[0];

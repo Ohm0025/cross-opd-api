@@ -12,7 +12,6 @@ exports.updateUnderly = async (req, res, next) => {
     if (!listUnderly) {
       throw new AppError("no this patient id", 400);
     }
-    console.log("wfnop" + newListUnderly);
     res.status(201).json({ message: "update success" });
   } catch (err) {
     next(err);

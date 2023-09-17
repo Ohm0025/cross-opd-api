@@ -71,6 +71,11 @@ exports.getOpdCard = async (req, res, next) => {
 exports.fetchOpdCard = async (req, res, next) => {
   try {
     const { patientId } = req.body;
+    await WaitCase.destroy({
+      where: {
+        createdAt: { [Op.lte]: new Date(Date.now() - 60 * 60 * 24 * 1000) },
+      },
+    });
     const waitCase = await WaitCase.findOne({
       where: { patientId },
     });

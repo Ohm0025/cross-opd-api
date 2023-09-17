@@ -20,6 +20,7 @@ const {
 } = require("../../services/examServices/activatedOpd");
 const AppError = require("../../utility/appError");
 const { Op } = require("sequelize");
+const { changeTimeZone } = require("../../utility/formatData/formatTime");
 
 exports.acivateOpd = async (req, res, next) => {
   try {
@@ -29,10 +30,18 @@ exports.acivateOpd = async (req, res, next) => {
     //check ว่า patient โดนตรวจอยู่ไหม
     const pendingCase = await getPendingCase(patientId, doctorId);
 
+    console.log(pendingCase);
     //เจอว่า patient โดนเราตรวจอยู่ หรือ ตรวจไปแล้ว
     if (pendingCase) {
+      console.log("is pending case");
       //ส่ง res currentCase เป็น pendingCase ที่หาเจอ
-      return res.status(201).json({ currentCase: pendingCase });
+      return res.status(201).json({
+        currentCase: pendingCase,
+        thisTime: changeTimeZone(
+          new Date(pendingCase.createdAt),
+          "Asia/Bangkok"
+        ),
+      });
     }
 
     //ไม่เจอใน pending มาหาใน waitCase ต่อ
