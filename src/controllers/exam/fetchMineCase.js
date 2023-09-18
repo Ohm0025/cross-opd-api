@@ -18,10 +18,11 @@ exports.fetchMyCase = async (req, res, next) => {
       where: {
         [Op.and]: [
           { doctorId },
-          { createdAt: { where: { [Op.between]: [tomorrow, yesterday] } } },
+          // { createdAt: { [Op.between]: [tomorrow, yesterday] } },
         ],
       },
     });
+    console.log("we" + caseIn24);
     res.status(201).json({
       finishCase: caseIn24.filter((item) => item.status === "finish"),
       unfinishCase: caseIn24.filter((item) => item.status === "pending"),
