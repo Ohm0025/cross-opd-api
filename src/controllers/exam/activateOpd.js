@@ -66,7 +66,7 @@ exports.acivateOpd = async (req, res, next) => {
       status: "pending",
       doctorId,
       patientId,
-      type: "regular",
+      type: waitCase?.type,
     });
 
     //สร้าง row chiefComplaint

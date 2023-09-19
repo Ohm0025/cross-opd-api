@@ -11,6 +11,7 @@ const {
   Advice,
   FollowUp,
   WaitCase,
+  Treatment,
 } = require("../../models");
 const { DOCTOR } = require("../../config/constants");
 const AppError = require("../../utility/appError");
@@ -29,8 +30,17 @@ exports.cancelOpd = async (req, res, next) => {
 
     //ลบ row ที่ต้องการ
     const result = await CaseOrder.destroy({
-      where: { id: caseId, doctorId, status: "pending", patientId },
+      where: { id: caseId },
     });
+
+    // const result = await CaseOrder.destroy({
+    //   where: [
+    //     { id: caseId },
+    //     { doctorId: doctorId },
+    //     { status: "pending" },
+    //     { patientId: patientId },
+    //   ],
+    // });
 
     if (result > 0) {
       await ChiefComplaint.destroy({ where: { caseId } });
@@ -42,14 +52,16 @@ exports.cancelOpd = async (req, res, next) => {
       await DetailDiag.destroy({ where: { caseId } });
       await Advice.destroy({ where: { caseId } });
       await FollowUp.destroy({ where: { caseId } });
-
-      await updateData(
-        WaitCase,
-        { status: "waiting" },
-        { where: { patientId, status: "inprogress" } }
-      );
+      await Treatment.destroy({ where: { caseId } });
     }
-    res.status(201).json({ result });
+    // await updateData(
+    //   WaitCase,
+    //   { status: "waiting" },
+    //   { where: [{ patientId: patientId }, { status: "inprogress" }] }
+    // );
+
+    await WaitCase.update({ status: "waiting" }, { where: { patientId } });
+    res.status(201).json({ caseId, patientId, result });
   } catch (err) {
     next(err);
   }

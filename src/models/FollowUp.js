@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
     fuDate: {
       type: DataTypes.STRING,
     },
+    fuStatus: {
+      type: DataTypes.ENUM("cancel", "finish", "unfinish"),
+      defaultValue: "unfinish",
+    },
   });
   FollowUp.associate = (db) => {
     //asso caseId : Mandatory

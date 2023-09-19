@@ -59,6 +59,13 @@ io.on("connection", (socket) => {
 
     io.emit("closeStatus", "closeCase");
   });
+
+  socket.on("cancelCase", (patientId) => {
+    waitingPatient = waitingPatient.filter(
+      (item) => item.patientId !== +patientId
+    );
+    io.emit("closeStatus", "cancelOpdCard");
+  });
 });
 
 if (process.env.NODE_ENV === "development") {

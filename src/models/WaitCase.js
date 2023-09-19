@@ -9,6 +9,10 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: true,
         },
       },
+      type: {
+        type: DataTypes.ENUM("followUp", "regular", "underly"),
+        defaultValue: "regular",
+      },
       status: {
         type: DataTypes.ENUM("waiting", "inprogress"),
         allowNull: false,

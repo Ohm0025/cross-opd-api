@@ -15,7 +15,8 @@ exports.openOpdCard = async (req, res, next) => {
     if (typeaccount !== PATIENT) {
       throw new AppError("your account not allow for this feature", 400);
     }
-    const { location, chiefComplaintFirst, presentIllnessFirst } = req.body;
+    const { location, chiefComplaintFirst, presentIllnessFirst, type } =
+      req.body;
 
     const userWait = await findUserInWaitList(patientId, WaitCase, UserPatient);
 
@@ -25,7 +26,7 @@ exports.openOpdCard = async (req, res, next) => {
 
     //create waiting database
     const waitCase = await createNewWaitCase(
-      { location, patientId, chiefComplaintFirst, presentIllnessFirst },
+      { location, patientId, chiefComplaintFirst, presentIllnessFirst, type },
       WaitCase
     );
     res.status(201).json({ waitCase });

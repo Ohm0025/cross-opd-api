@@ -25,7 +25,8 @@ exports.createRecord = async (req, res, next) => {
     const caseId = +req.params.caseId;
 
     const { pePic, labPic, imgPic } = req.files;
-    const { patientId, inputData, detailDrug, detailProcedure } = req.body;
+    const { patientId, inputData, detailDrug, detailProcedure, typeStatus } =
+      req.body;
     const waitCase = await getWaitingPt(patientId);
 
     const { cc, pi, pe, diag, img, lab, detailDx, ad, fu, tx } =
@@ -38,7 +39,7 @@ exports.createRecord = async (req, res, next) => {
     //   { where: { id: caseId } }
     // );
 
-    await CaseOrder.update({ status: "finish" }, { where: { id: caseId } });
+    await CaseOrder.update({ status: typeStatus }, { where: { id: caseId } });
     //update db_chieComplaint
     await updateData(
       ChiefComplaint,
@@ -204,8 +205,9 @@ exports.createRecord = async (req, res, next) => {
     // createImgList(Imaging, img, caseId);
 
     //delete waitCase
-    waitCase && deleteRow(waitCase.id, WaitCase);
-
+    if (typeStatus === "finish") {
+      waitCase && deleteRow(waitCase.id, WaitCase);
+    }
     res.status(201).json({ message: "create complete" });
   } catch (err) {
     next(err);
