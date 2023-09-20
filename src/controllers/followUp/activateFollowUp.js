@@ -16,6 +16,7 @@ exports.activateFollowUp = async (req, res, next) => {
       where: { id: fuId },
     });
 
+    console.log(otherFu.fuHos);
     //validate follow up
     let result = Math.ceil(
       new Date(otherFu.fuDate).getTime() / (1000 * 3600 * 24) -

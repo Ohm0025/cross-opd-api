@@ -43,7 +43,7 @@ exports.fetchCurrentCase = async (req, res, next) => {
         { model: Advice, attributes: ["detail"], where: { caseId } },
         {
           model: FollowUp,
-          attributes: ["fuHos", "fuOPD", "fuDetail", "fuDate"],
+          attributes: ["fuHos", "fuOPD", "fuDetail", "fuDate", "id"],
           where: { caseId },
         },
         {
