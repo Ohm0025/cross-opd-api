@@ -17,8 +17,14 @@ exports.fetchAllPast = async (req, res, next) => {
   try {
     const allPastCase = await CaseOrder.findAll({
       attributes: ["id", "updatedAt", "doctorId"],
-      where: { patientId: req.body.patientId },
+      where: { patientId: req.body.patientId, status: "finish" },
     });
+
+    console.log(allPastCase);
+    //validate empty case
+    if (allPastCase.length === 0) {
+      return res.status(201).json({ allPastCase: [], lastPastCase: null });
+    }
     const lastPastCase = await CaseOrder.findOne({
       attributes: ["id", "updatedAt", "location"],
       include: [
@@ -100,7 +106,7 @@ exports.fetchAllPast = async (req, res, next) => {
           },
         },
       ],
-      where: { patientId: req.body.patientId },
+      where: { patientId: req.body.patientId, status: "finish" },
     });
     res.status(201).json({ allPastCase, lastPastCase });
   } catch (err) {

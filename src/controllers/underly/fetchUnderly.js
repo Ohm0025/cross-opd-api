@@ -4,8 +4,8 @@ exports.fetchUnderly = async (req, res, next) => {
   try {
     const { patientId } = req.body;
     const listOfUnderly = await UserPatient.findOne({
-      where: { patientId },
-      include: { underlying },
+      where: { id: patientId },
+      attributes: ["underlying"],
     });
     res.status(201).json({ listOfUnderly });
   } catch (err) {

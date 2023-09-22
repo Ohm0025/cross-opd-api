@@ -57,6 +57,9 @@ module.exports = (sequelize, DataTypes) => {
       underlying: {
         type: DataTypes.TEXT,
       },
+      allergy: {
+        type: DataTypes.TEXT,
+      },
     },
     { underscored: true }
   );
