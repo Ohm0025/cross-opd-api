@@ -1,8 +1,8 @@
 const express = require("express");
-const drugController = require("../controllers/drugController");
+const { fetchAllDrug } = require("../controllers/drugHx/fetchAllDrug");
 const router = express.Router();
 
-router.post("/get", drugController.fetchDrug);
-router.post("/prescript", drugController.prescript);
+router.post("/get", fetchAllDrug);
+// router.post("/prescript", drugController.prescript);
 
 module.exports = router;

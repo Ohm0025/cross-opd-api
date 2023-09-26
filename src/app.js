@@ -15,6 +15,8 @@ const pastRoute = require("./routes/pastRoute");
 const underlyRoute = require("./routes/underlyRoute");
 const followUpRoute = require("./routes/followUpRoute");
 const allergyRoute = require("./routes/allergyRoute");
+const labHxRoute = require("./routes/labHxRoute");
+const imgHxRoute = require("./routes/imgHxRoute");
 
 const authenticate = require("./middleware/authenticate");
 const uploadMiddleware = require("./middleware/uploadMiddleWare");
@@ -88,6 +90,8 @@ app.use("/getPast", authenticate, pastRoute);
 app.use("/underly", authenticate, underlyRoute);
 app.use("/followUp", authenticate, followUpRoute);
 app.use("/allergy", authenticate, allergyRoute);
+app.use("/getLab", authenticate, labHxRoute);
+app.use("/getImg", authenticate, imgHxRoute);
 
 app.post("/testupload", uploadMiddleware, testUploadImg);
 
