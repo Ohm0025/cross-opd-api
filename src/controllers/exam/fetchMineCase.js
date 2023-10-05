@@ -16,13 +16,11 @@ exports.fetchMyCase = async (req, res, next) => {
     const doctorId = req.user.id;
     const caseIn24 = await CaseOrder.findAll({
       where: {
-        [Op.and]: [
-          { doctorId },
-          // { createdAt: { [Op.between]: [tomorrow, yesterday] } },
-        ],
+        doctorId,
+        createdAt: { [Op.between]: [yesterday, tomorrow] },
       },
     });
-    console.log("we" + caseIn24);
+
     res.status(201).json({
       finishCase: caseIn24.filter((item) => item.status === "finish"),
       unfinishCase: caseIn24.filter((item) => item.status === "pending"),

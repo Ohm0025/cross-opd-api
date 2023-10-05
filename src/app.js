@@ -19,6 +19,7 @@ const labHxRoute = require("./routes/labHxRoute");
 const imgHxRoute = require("./routes/imgHxRoute");
 
 const authenticate = require("./middleware/authenticate");
+
 const uploadMiddleware = require("./middleware/uploadMiddleWare");
 const { testUploadImg } = require("./controllers/testController");
 
@@ -83,6 +84,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 app.use("/auth", authRoute);
+
+//re-start all expired case
+// app.use("/", authenticate, reStartCase);
+
 app.use("/opd", authenticate, opdRoute);
 app.use("/drug", authenticate, drugRoute);
 app.use("/exam", authenticate, examRoute);

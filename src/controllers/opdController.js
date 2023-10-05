@@ -1,9 +1,10 @@
 const { PATIENT, DOCTOR } = require("../config/constants");
-const { UserPatient, WaitCase } = require("../models");
+const { UserPatient, WaitCase, CaseOrder } = require("../models");
 const {
   findUserInWaitList,
   createNewWaitCase,
 } = require("../services/opdServices/openCard");
+const reCase = require("../services/opdServices/reNewCase");
 const AppError = require("../utility/appError");
 const { createNewCase } = require("../utility/createNewCase");
 const { Op } = require("sequelize");
@@ -18,11 +19,23 @@ exports.openOpdCard = async (req, res, next) => {
     const { location, chiefComplaintFirst, presentIllnessFirst, type } =
       req.body;
 
-    const userWait = await findUserInWaitList(patientId, WaitCase, UserPatient);
+    const userWait = await findUserInWaitList(
+      patientId,
+      WaitCase,
+      UserPatient,
+      CaseOrder
+    );
 
     if (userWait) {
       throw new AppError("you are waiting Now", 400);
     }
+
+    if (location.trim() === "") {
+      throw new AppError("location is required.", 400);
+    }
+
+    //reCase
+    await reCase(req.user?.id);
 
     //create waiting database
     const waitCase = await createNewWaitCase(
@@ -72,6 +85,7 @@ exports.fetchOpdCard = async (req, res, next) => {
         createdAt: { [Op.lte]: new Date(Date.now() - 60 * 60 * 24 * 1000) },
       },
     });
+
     const waitCase = await WaitCase.findOne({
       where: { patientId },
     });
