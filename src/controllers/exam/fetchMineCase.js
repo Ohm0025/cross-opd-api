@@ -4,7 +4,8 @@ const { changeTimeZone } = require("../../utility/formatData/formatTime");
 
 exports.fetchMyCase = async (req, res, next) => {
   try {
-    let today = changeTimeZone(new Date(), "Asia/Bangkok");
+    //let today = changeTimeZone(new Date(), "Asia/Bangkok");
+    let today = new Date();
     let day = 60 * 60 * 24 * 1000;
     let tomorrow = new Date(today.getTime() + day);
     let yesterday = new Date(today.getTime() - day);

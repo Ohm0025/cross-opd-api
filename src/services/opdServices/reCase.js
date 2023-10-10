@@ -16,7 +16,8 @@ const { changeTimeZone } = require("../../utility/formatData/formatTime");
 
 module.exports = async (req, res, next) => {
   try {
-    let today = changeTimeZone(new Date(), "Asia/Bangkok");
+    //let today = changeTimeZone(new Date(), "Asia/Bangkok");
+    let today = new Date();
     let day = 60 * 60 * 24 * 1000;
     let yesterday = new Date(today.getTime() - day);
     const { user } = req.body;
@@ -84,6 +85,11 @@ module.exports = async (req, res, next) => {
         },
       });
       await FollowUp.destroy({
+        where: {
+          caseId: remainCase.id,
+        },
+      });
+      await Treatment.destroy({
         where: {
           caseId: remainCase.id,
         },

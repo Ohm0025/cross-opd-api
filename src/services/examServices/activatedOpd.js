@@ -3,7 +3,7 @@ const { QueryTypes, Op } = require("sequelize");
 const { changeTimeZone } = require("../../utility/formatData/formatTime");
 
 exports.getPendingCase = async (patientId, doctorId) => {
-  // let today = changeTimeZone(new Date(), "Asia/Bangkok");
+  //let today = changeTimeZone(new Date(), "Asia/Bangkok");
   let today = new Date();
   let day = 60 * 60 * 24 * 1000;
   let tomorrow = new Date(today.getTime() + day);
