@@ -29,7 +29,7 @@ const server = require("http").createServer(app);
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: "http://localhost:3001",
+    origin: "http://localhost:3000",
   },
 });
 
@@ -50,25 +50,32 @@ io.on("connection", (socket) => {
       (item) => item.patientId === +patientId
     );
 
-    selectedCase && io.emit("changeStatus", "inprogress");
+    selectedCase &&
+      io.emit("changeStatus", {
+        status: "inprogress",
+        sendPatientId: +patientId,
+      });
   });
 
   socket.on("finishCase", (patientId) => {
     waitingPatient = waitingPatient.filter(
       (item) => item.patientId !== +patientId
     );
-    let selectedCase = waitingPatient.find(
-      (item) => item.patientId === +patientId
-    );
 
-    io.emit("closeStatus", "closeCase");
+    io.emit("finishStatus", {
+      command: "closeCase",
+      sendPatientId: +patientId,
+    });
   });
 
   socket.on("cancelCase", (patientId) => {
-    waitingPatient = waitingPatient.filter(
-      (item) => item.patientId !== +patientId
-    );
-    io.emit("closeStatus", "cancelOpdCard");
+    // waitingPatient = waitingPatient.filter(
+    //   (item) => item.patientId !== +patientId
+    // );
+    io.emit("closeStatus", {
+      command: "cancelOpdCard",
+      sendPatientId: +patientId,
+    });
   });
 });
 
