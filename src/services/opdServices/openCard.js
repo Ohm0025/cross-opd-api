@@ -13,7 +13,7 @@ exports.findUserInWaitList = async (
   let tomorrow = new Date(today.getTime() + day);
   let yesterday = new Date(today.getTime() - day);
 
-  const userPending = await CaseOrder.findOne({
+  const userPending = await CaseOrder?.findOne({
     where: {
       patientId,
       status: "pending",

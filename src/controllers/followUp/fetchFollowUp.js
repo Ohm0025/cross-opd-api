@@ -17,7 +17,8 @@ exports.fetchFollowUp = async (req, res, next) => {
         {
           model: FollowUp,
           where: {
-            [Op.or]: [{ fuDate: { [Op.gte]: today } }],
+            fuDate: { [Op.gte]: today },
+            fuStatus: "unfinish",
           },
         },
       ],

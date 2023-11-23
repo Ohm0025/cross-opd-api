@@ -49,7 +49,7 @@ exports.validateLogin = async (typeaccount, email, password) => {
   if (typeaccount === DOCTOR) {
     const userdoctor = await UserDoctor.findOne({ where: { email } });
     if (!userdoctor) {
-      throw new AppError("email is incorrect or no this user", 400);
+      throw new AppError("email is incorrect or this user not exist", 400);
     }
     const isCorrect = await bcrypt.compare(password, userdoctor.password);
     if (!isCorrect) {
@@ -58,7 +58,7 @@ exports.validateLogin = async (typeaccount, email, password) => {
   } else if (typeaccount === PATIENT) {
     const userpatient = await UserPatient.findOne({ where: { email } });
     if (!userpatient) {
-      throw new AppError("email is incorrect or no this user", 400);
+      throw new AppError("email is incorrect or no this user not exist", 400);
     }
     const isCorrect = await bcrypt.compare(password, userpatient.password);
     if (!isCorrect) {

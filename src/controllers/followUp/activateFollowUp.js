@@ -4,6 +4,7 @@ const {
   findUserInWaitList,
   createNewWaitCase,
 } = require("../../services/opdServices/openCard");
+const AppError = require("../../utility/appError");
 
 exports.activateFollowUp = async (req, res, next) => {
   try {
